@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="dicoding:email" content="rozaqsapa@gmail.com">
+    <title>{{ title }} - Belajar Jadi Asyik!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f9ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .chat-container {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #29B6F6, #1E88E5);
+            text-align: center;
+            color: white;
+            padding: 20px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        .chat-header h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2rem;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 5px 0 0;
+        }
+
+        .chat-box {
+            flex-direction: column;
+            max-height: 450px;
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            gap: 15px;
+            min-height: 300px;
+        }
+
+        .chat-bubble {
+            align-items: flex-end;
+            border-radius: 18px;
+            max-width: 80%;
+            padding: 12px 18px;
+            position: relative;
+            display: flex;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .chat-bubble.user {
+            background-color: #FFD54F;
+            color: #333;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-bubble.bot {
+            background-color: #E0F7FA;
+            color: #263238;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-bubble .bot-avatar {
+            border: 2px solid white;
+            height: 35px;
+            margin-right: 10px;
+            object-fit: cover;
+            width: 35px;
+            flex-shrink: 0;
+            border-radius: 50%;
+        }
+
+        .chat-bubble p {
+            margin: 0;
+        }
+
+        .chat-input-area {
+            border-top: 1px solid #EEEEEE;
+            padding: 15px 20px;
+            display: flex;
+            background-color: #FAFAFA;
+        }
+
+        .chat-input-area form {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .chat-input-area input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 18px;
+            border: 1px solid #CFD8DC;
+            border-radius: 20px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            min-width: 0;
+        }
+
+        .chat-input-area input[type="text"]:focus {
+            border-color: #29B6F6;
+            box-shadow: 0 0 0 3px rgba(41, 182, 246, 0.2);
+        }
+
+        .chat-input-area button {
+            background-color: #FFA726;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .chat-input-area button:hover {
+            background-color: #FB8C00;
+            transform: translateY(-1px);
+        }
+
+        .chat-input-area button:active {
+            transform: translateY(0px);
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-box::-webkit-scrollbar-track {
+            background: #f0f9ff;
+            border-radius: 10px;
+        }
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #B0BEC5;
+            border-radius: 10px;
+        }
+        .chat-box::-webkit-scrollbar-thumb:hover {
+            background: #90A4AE;
+        }
+
+        .example-questions {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #78909C;
+            padding: 10px 20px 0;
+            background-color: #FAFAFA;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1>EduPintar IPAS</h1>
+            <p>Robot Cerdas Teman Belajarmu!</p>
+        </header>
+
+        <div class="chat-box" id="chatBox">
+            {% for message in chat_history %}
+                {% if message.sender == 'user' %}
+                <div class="chat-bubble user">
+                    <p>{{ message.text }}</p>
+                </div>
+                {% elif message.sender == 'bot' %}
+                <div class="chat-bubble bot">
+                    <img src="{{ url_for('static', filename='images/bot_avatar.jpg') }}"
+                         alt="Bot Avatar"
+                         class="bot-avatar"
+                         onerror="this.onerror=null; this.src='https://placehold.co/35x35/cccccc/000000?text=R&font=poppins';">
+                    <p>{{ message.text }}</p>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="example-questions">
+            <p>Contoh: "Apa itu ekspor?" atau "Sendi itu apa ya?"</p>
+        </div>
+
+        <div class="chat-input-area">
+            <form method="POST" action="{{ url_for('main.index') }}" id="chatForm">
+                <input type="text" name="question" placeholder="Ketik pertanyaanmu di sini..." autofocus autocomplete="off" required>
+                <button type="submit">
+                    Kirim
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chatBox');
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        window.addEventListener('load', () => {
+             scrollToBottom();
+        });
+
+        const chatForm = document.getElementById('chatForm');
+        const userInput = chatForm.querySelector('input[name="question"]');
+        const submitButton = chatForm.querySelector('button[type="submit"]');
+
+        chatForm.addEventListener('submit', function() {
+            if (userInput.value.trim() === "") {
+                event.preventDefault();
+                userInput.focus();
+                return;
+            }
+            submitButton.disabled = true;
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.innerHTML = 'Mengirim...';
+
+            setTimeout(() => {
+                if (submitButton.disabled) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
